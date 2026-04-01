@@ -1,18 +1,51 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Routes publiques (accessibles sans connexion)
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
+| Équivalent Java : les URLs dans .permitAll() de Spring Security
 */
 
+// Page d'accueil → redirige vers login
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
+});
+
+// Afficher formulaire inscription
+// Route::get = @GetMapping en Spring
+// 'register' entre crochets = nom de la route (pour redirect()->route('register'))
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+
+// Traiter formulaire inscription
+// Route::post = @PostMapping en Spring
+Route::post('/register', [AuthController::class, 'register']);
+
+// Afficher formulaire connexion
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+
+// Traiter formulaire connexion
+Route::post('/login', [AuthController::class, 'login']);
+
+/*
+|--------------------------------------------------------------------------
+| Routes protégées (connexion obligatoire)
+|--------------------------------------------------------------------------
+| middleware('auth') = l'équivalent de .authenticated() en Spring Security
+| Si le user n'est pas connecté, Laravel le redirige vers 'login' automatiquement
+*/
+
+Route::middleware('auth')->group(function () {
+
+    // Déconnexion
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Dashboard temporaire (on le remplacera plus tard)
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
 });
