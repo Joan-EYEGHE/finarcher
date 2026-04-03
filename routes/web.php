@@ -63,5 +63,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('revenus', \App\Http\Controllers\RevenuController::class);
 
     // CRUD Dépense
-    // Route::resource('depenses', \App\Http\Controllers\DepenseController::class);
+    Route::resource('depenses', \App\Http\Controllers\DepenseController::class);
 });
