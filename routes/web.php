@@ -48,12 +48,9 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-
+    
     // CRUD Catégorie
     // Route::resource = génère automatiquement les 7 routes CRUD
-    // Équivalent Java : un @RestController avec @RequestMapping("/categories")
-    // qui aurait GET /categories, GET /categories/create, POST /categories,
-    // GET /categories/{id}, GET /categories/{id}/edit, PUT /categories/{id}, DELETE /categories/{id}
     Route::resource('categories', \App\Http\Controllers\CategorieController::class);
 
     // CRUD Portefeuille (appelé "Compte" dans l'UI)
@@ -61,4 +58,10 @@ Route::middleware('auth')->group(function () {
 
     // CRUD Acteur (appelé "Contact" dans l'UI)
     Route::resource('acteurs', \App\Http\Controllers\ActeurController::class);
+
+    // CRUD Revenu
+    Route::resource('revenus', \App\Http\Controllers\RevenuController::class);
+
+    // CRUD Dépense
+    // Route::resource('depenses', \App\Http\Controllers\DepenseController::class);
 });
