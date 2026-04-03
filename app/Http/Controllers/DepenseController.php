@@ -64,11 +64,9 @@ class DepenseController extends Controller
         return redirect()->route('depenses.index');
     }
 
-    public function edit(Depense $depense)
+public function edit(Depense $depense)
     {
-        if ($depense->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $depense);
 
         $categories = Categorie::where('user_id', Auth::id())->orderBy('nom')->get();
         $portefeuilles = Portefeuille::where('user_id', Auth::id())->orderBy('nom')->get();
@@ -77,9 +75,7 @@ class DepenseController extends Controller
 
     public function update(Request $request, Depense $depense)
     {
-        if ($depense->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $depense);
 
         $validated = $request->validate([
             'categorie_id' => ['required', 'exists:categories,id'],
@@ -90,19 +86,15 @@ class DepenseController extends Controller
             'prix' => ['required', 'numeric', 'min:0.01'],
         ]);
 
-        // Vérifie que la catégorie appartient au user
         Categorie::where('id', $validated['categorie_id'])
             ->where('user_id', Auth::id())->firstOrFail();
 
-        // --- CORRECTION DU SOLDE ---
-        // 1. Annuler l'ancienne dépense sur l'ancien portefeuille (si existait)
         if ($depense->portefeuille_id) {
             $ancienPortefeuille = Portefeuille::findOrFail($depense->portefeuille_id);
-            $ancienPortefeuille->solde += $depense->montant_total; // on rend l'argent
+            $ancienPortefeuille->solde += $depense->montant_total;
             $ancienPortefeuille->save();
         }
 
-        // 2. Appliquer la nouvelle dépense sur le nouveau portefeuille (si sélectionné)
         if (!empty($validated['portefeuille_id'])) {
             $nouveauPortefeuille = Portefeuille::where('id', $validated['portefeuille_id'])
                 ->where('user_id', Auth::id())->firstOrFail();
@@ -110,7 +102,6 @@ class DepenseController extends Controller
             $nouveauPortefeuille->save();
         }
 
-        // 3. Met à jour la dépense (montant_total recalculé par boot())
         $depense->update($validated);
 
         return redirect()->route('depenses.index')
@@ -119,14 +110,11 @@ class DepenseController extends Controller
 
     public function destroy(Depense $depense)
     {
-        if ($depense->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $depense);
 
-        // Annule l'effet sur le solde si un portefeuille était lié
         if ($depense->portefeuille_id) {
             $portefeuille = Portefeuille::findOrFail($depense->portefeuille_id);
-            $portefeuille->solde += $depense->montant_total; // on rend l'argent
+            $portefeuille->solde += $depense->montant_total;
             $portefeuille->save();
         }
 

@@ -67,36 +67,20 @@ class CategorieController extends Controller
     {
         return redirect()->route('categories.index');
     }
-
-    /**
-     * Affiche le formulaire d'édition
-     * Équivalent Java : GET /categories/{id}/edit
-     *
-     * "Route Model Binding" : Laravel trouve automatiquement la Categorie par son id
-     * C'est comme si Spring faisait automatiquement findById() avant d'entrer dans la méthode
-     */
-    public function edit(Categorie $category)
+public function edit(Categorie $category)
     {
-        // Vérifie que la catégorie appartient au user connecté
-        if ($category->user_id !== Auth::id()) {
-            abort(403);
-        }
+        // $this->authorize() appelle automatiquement CategoriePolicy::update()
+        // Si ça retourne false, Laravel lance une erreur 403
+        // Équivalent Java : @PreAuthorize
+        $this->authorize('update', $category);
 
         return view('categories.edit', compact('category'));
     }
 
-    /**
-     * Met à jour la catégorie
-     * Équivalent Java : PUT /categories/{id} → update()
-     */
     public function update(Request $request, Categorie $category)
     {
-        // Vérifie que la catégorie appartient au user connecté
-        if ($category->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $category);
 
-        // Empêche la modification de "Divers"
         if ($category->is_default) {
             return redirect()->route('categories.index')
                 ->with('error', 'La catégorie par défaut ne peut pas être modifiée.');
@@ -114,30 +98,20 @@ class CategorieController extends Controller
             ->with('success', 'Catégorie modifiée avec succès.');
     }
 
-    /**
-     * Supprime la catégorie (soft delete)
-     * Équivalent Java : DELETE /categories/{id}
-     */
     public function destroy(Categorie $category)
     {
-        // Vérifie que la catégorie appartient au user connecté
-        if ($category->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $category);
 
-        // Empêche la suppression de "Divers"
         if ($category->is_default) {
             return redirect()->route('categories.index')
                 ->with('error', 'La catégorie par défaut ne peut pas être supprimée.');
         }
 
-        // Vérifie qu'aucune dépense n'est liée
         if ($category->depenses()->count() > 0) {
             return redirect()->route('categories.index')
                 ->with('error', 'Impossible de supprimer : des dépenses sont liées à cette catégorie.');
         }
 
-        // Soft delete (met un timestamp dans deleted_at)
         $category->delete();
 
         return redirect()->route('categories.index')

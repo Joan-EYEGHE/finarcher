@@ -63,24 +63,17 @@ class PortefeuilleController extends Controller
     /**
      * Formulaire d'édition
      */
-    public function edit(Portefeuille $portefeuille)
+public function edit(Portefeuille $portefeuille)
     {
-        if ($portefeuille->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $portefeuille);
 
         $devises = Devise::orderBy('nom')->get();
         return view('portefeuilles.edit', compact('portefeuille', 'devises'));
     }
 
-    /**
-     * Met à jour le portefeuille
-     */
     public function update(Request $request, Portefeuille $portefeuille)
     {
-        if ($portefeuille->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $portefeuille);
 
         $validated = $request->validate([
             'nom' => ['required', 'string', 'max:255'],
@@ -94,16 +87,10 @@ class PortefeuilleController extends Controller
             ->with('success', 'Compte modifié avec succès.');
     }
 
-    /**
-     * Supprime le portefeuille (soft delete)
-     */
     public function destroy(Portefeuille $portefeuille)
     {
-        if ($portefeuille->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $portefeuille);
 
-        // Bloque si des revenus ou dépenses sont liés
         if ($portefeuille->revenus()->count() > 0 || $portefeuille->depenses()->count() > 0) {
             return redirect()->route('portefeuilles.index')
                 ->with('error', 'Impossible de supprimer : des opérations sont liées à ce compte.');

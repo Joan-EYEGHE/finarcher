@@ -59,11 +59,9 @@ class RevenuController extends Controller
         return redirect()->route('revenus.index');
     }
 
-    public function edit(Revenu $revenu)
+public function edit(Revenu $revenu)
     {
-        if ($revenu->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $revenu);
 
         $portefeuilles = Portefeuille::where('user_id', Auth::id())->orderBy('nom')->get();
         $acteurs = Acteur::where('user_id', Auth::id())->orderBy('nom')->get();
@@ -72,9 +70,7 @@ class RevenuController extends Controller
 
     public function update(Request $request, Revenu $revenu)
     {
-        if ($revenu->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $revenu);
 
         $validated = $request->validate([
             'portefeuille_id' => ['required', 'exists:portefeuilles,id'],
@@ -84,24 +80,18 @@ class RevenuController extends Controller
             'montant' => ['required', 'numeric', 'min:0.01'],
         ]);
 
-        // Vérifie que le portefeuille et l'acteur appartiennent au user
         Acteur::where('id', $validated['acteur_id'])
             ->where('user_id', Auth::id())->firstOrFail();
 
-        // --- CORRECTION DU SOLDE ---
-        // 1. Annuler l'ancien montant sur l'ancien portefeuille
         $ancienPortefeuille = Portefeuille::findOrFail($revenu->portefeuille_id);
         $ancienPortefeuille->solde -= $revenu->montant;
         $ancienPortefeuille->save();
 
-        // 2. Ajouter le nouveau montant sur le nouveau portefeuille
-        //    (peut être le même ou un différent si l'user a changé de portefeuille)
         $nouveauPortefeuille = Portefeuille::where('id', $validated['portefeuille_id'])
             ->where('user_id', Auth::id())->firstOrFail();
         $nouveauPortefeuille->solde += $validated['montant'];
         $nouveauPortefeuille->save();
 
-        // 3. Met à jour le revenu
         $revenu->update($validated);
 
         return redirect()->route('revenus.index')
@@ -110,11 +100,8 @@ class RevenuController extends Controller
 
     public function destroy(Revenu $revenu)
     {
-        if ($revenu->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $revenu);
 
-        // Annule l'effet sur le solde : -montant
         $portefeuille = Portefeuille::findOrFail($revenu->portefeuille_id);
         $portefeuille->solde -= $revenu->montant;
         $portefeuille->save();

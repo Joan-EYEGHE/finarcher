@@ -2,25 +2,34 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use App\Models\Categorie;
+use App\Models\Portefeuille;
+use App\Models\Acteur;
+use App\Models\Revenu;
+use App\Models\Depense;
+use App\Policies\CategoriePolicy;
+use App\Policies\PortefeuillePolicy;
+use App\Policies\ActeurPolicy;
+use App\Policies\RevenuPolicy;
+use App\Policies\DepensePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
     /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
+     * La correspondance Modèle → Policy
+     * Laravel sait maintenant quelle Policy utiliser pour chaque modèle
      */
     protected $policies = [
-        //
+        Categorie::class => CategoriePolicy::class,
+        Portefeuille::class => PortefeuillePolicy::class,
+        Acteur::class => ActeurPolicy::class,
+        Revenu::class => RevenuPolicy::class,
+        Depense::class => DepensePolicy::class,
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
     }
 }

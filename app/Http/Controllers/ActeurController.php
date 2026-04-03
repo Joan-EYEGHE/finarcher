@@ -41,20 +41,16 @@ class ActeurController extends Controller
         return redirect()->route('acteurs.index');
     }
 
-    public function edit(Acteur $acteur)
+public function edit(Acteur $acteur)
     {
-        if ($acteur->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $acteur);
 
         return view('acteurs.edit', compact('acteur'));
     }
 
     public function update(Request $request, Acteur $acteur)
     {
-        if ($acteur->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $acteur);
 
         $validated = $request->validate([
             'nom' => ['required', 'string', 'max:255'],
@@ -70,11 +66,8 @@ class ActeurController extends Controller
 
     public function destroy(Acteur $acteur)
     {
-        if ($acteur->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('delete', $acteur);
 
-        // Bloque si des revenus sont liés
         if ($acteur->revenus()->count() > 0) {
             return redirect()->route('acteurs.index')
                 ->with('error', 'Impossible de supprimer : des revenus sont liés à ce contact.');
