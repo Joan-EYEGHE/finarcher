@@ -2,63 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acteur;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ActeurController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $acteurs = Acteur::where('user_id', Auth::id())
+            ->orderBy('nom')
+            ->get();
+
+        return view('acteurs.index', compact('acteurs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('acteurs.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nom' => ['required', 'string', 'max:255'],
+            'adresse' => ['nullable', 'string', 'max:255'],
+            'numero' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        Auth::user()->acteurs()->create($validated);
+
+        return redirect()->route('acteurs.index')
+            ->with('success', 'Contact créé avec succès.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Acteur $acteur)
     {
-        //
+        return redirect()->route('acteurs.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Acteur $acteur)
     {
-        //
+        if ($acteur->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('acteurs.edit', compact('acteur'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Acteur $acteur)
     {
-        //
+        if ($acteur->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'nom' => ['required', 'string', 'max:255'],
+            'adresse' => ['nullable', 'string', 'max:255'],
+            'numero' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $acteur->update($validated);
+
+        return redirect()->route('acteurs.index')
+            ->with('success', 'Contact modifié avec succès.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Acteur $acteur)
     {
-        //
+        if ($acteur->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Bloque si des revenus sont liés
+        if ($acteur->revenus()->count() > 0) {
+            return redirect()->route('acteurs.index')
+                ->with('error', 'Impossible de supprimer : des revenus sont liés à ce contact.');
+        }
+
+        $acteur->delete();
+
+        return redirect()->route('acteurs.index')
+            ->with('success', 'Contact supprimé avec succès.');
     }
 }

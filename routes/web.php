@@ -59,4 +59,6 @@ Route::middleware('auth')->group(function () {
     // CRUD Portefeuille (appelé "Compte" dans l'UI)
     Route::resource('portefeuilles', \App\Http\Controllers\PortefeuilleController::class);
 
+    // CRUD Acteur (appelé "Contact" dans l'UI)
+    Route::resource('acteurs', \App\Http\Controllers\ActeurController::class);
 });
