@@ -29,7 +29,6 @@ class User extends Authenticatable
     // Équivalent Java : un converter JPA ou @Temporal
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 
     /**

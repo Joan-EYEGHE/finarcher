@@ -23,7 +23,7 @@ class DemoSeeder extends Seeder
             'name' => 'Utilisateur Démo',
             'email' => 'demo@finarcher.com',
             'numero' => '770000000',
-            'password' => 'password',
+            'password' => bcrypt('password'),
         ]);
 
         // 3. Catégorie par défaut "Divers" (créée automatiquement normalement, mais on s'assure)

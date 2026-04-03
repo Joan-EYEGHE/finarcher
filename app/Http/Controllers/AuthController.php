@@ -41,7 +41,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'numero' => $validated['numero'] ?? null,
-            'password' => $validated['password'],
+            'password' => bcrypt($validated['password']),
         ]);
 
         // Crée la catégorie "Divers" par défaut pour ce nouveau user
