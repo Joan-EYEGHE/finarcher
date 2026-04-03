@@ -48,17 +48,3 @@
     </form>
 </div>
 @endsection
-```
-
-**Nouveau concept — `old('nom', $category->nom)` :**
-
-Le deuxième paramètre est la valeur par défaut. En mode édition, si la validation échoue, `old('nom')` remet ce que le user avait tapé. Sinon, ça affiche la valeur actuelle `$category->nom`.
-
----
-
-**Récap des fichiers :**
-```
-resources/views/categories/
-├── index.blade.php    ← liste
-├── create.blade.php   ← formulaire création
-└── edit.blade.php     ← formulaire édition

@@ -5,13 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasSlug;
+
 
 class Depense extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasSlug;
+
+
+        // Override : utilise "designation" au lieu de "nom" pour le slug
+    public function slugSource(): string
+    {
+        return 'designation';
+    }
 
     protected $fillable = [
         'user_id',
+        'slug',
         'categorie_id',
         'portefeuille_id',
         'date_operation',

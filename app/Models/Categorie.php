@@ -5,15 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasSlug;
+
 
 class Categorie extends Model
 {
     // SoftDeletes = au lieu de DELETE, Laravel met un timestamp dans deleted_at
     // Équivalent Java : un filtre @Where("deleted_at IS NULL") global sur l'entité
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasSlug;
 
     protected $fillable = [
-        'user_id',
+        'user_id',      
+        'slug',
         'nom',
         'description',
         'icone',
