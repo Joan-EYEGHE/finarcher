@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,10 +41,8 @@ Route::middleware('auth')->group(function () {
     // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard temporaire (on le remplacera plus tard)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     
     // CRUD Catégorie
