@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Categorie;
+use App\Models\Devise;
+use App\Models\Portefeuille;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
@@ -44,12 +46,26 @@ class AuthController extends Controller
             'password' => bcrypt($validated['password']),
         ]);
 
-        // Crée la catégorie "Divers" par défaut pour ce nouveau user
-        Categorie::create([
-            'user_id' => $user->id,
-            'nom' => 'Divers',
-            'description' => 'Catégorie par défaut',
-            'is_default' => true,
+        // 6 catégories par défaut pour le nouvel utilisateur
+        $categories = [
+            ['nom' => 'Divers',       'description' => 'Catégorie par défaut pour les dépenses non classées', 'is_default' => true],
+            ['nom' => 'Santé',        'description' => 'Pharmacie, consultations et soins médicaux',          'is_default' => false],
+            ['nom' => 'Logement',     'description' => 'Loyer, factures d\'eau et d\'électricité',            'is_default' => false],
+            ['nom' => 'Services',     'description' => 'Abonnements, internet, téléphone et services numériques', 'is_default' => false],
+            ['nom' => 'Transport',    'description' => 'Taxi, bus, essence et déplacements',                  'is_default' => false],
+            ['nom' => 'Alimentation', 'description' => 'Repas, courses, restaurants et boissons',            'is_default' => false],
+        ];
+        foreach ($categories as $cat) {
+            Categorie::create(array_merge($cat, ['user_id' => $user->id]));
+        }
+
+        // Portefeuille "Espèce" par défaut en FCFA
+        $xof = Devise::where('code', 'XOF')->first();
+        Portefeuille::create([
+            'user_id'   => $user->id,
+            'devise_id' => $xof->id,
+            'nom'       => 'Espèce',
+            'solde'     => 0,
         ]);
 
         // Connecte le user automatiquement après inscription

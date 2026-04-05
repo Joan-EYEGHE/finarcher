@@ -26,34 +26,52 @@ class DemoSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        // 3. Catégorie par défaut "Divers" (créée automatiquement normalement, mais on s'assure)
+        // 3. 6 catégories par défaut (identiques à celles créées à l'inscription)
         $divers = Categorie::create([
             'user_id' => $user->id,
             'nom' => 'Divers',
-            'description' => 'Catégorie par défaut',
+            'description' => 'Catégorie par défaut pour les dépenses non classées',
             'is_default' => true,
         ]);
 
-        // 4. Catégories supplémentaires
-        $alimentation = Categorie::create([
+        $sante = Categorie::create([
             'user_id' => $user->id,
-            'nom' => 'Alimentation',
-            'description' => 'Courses et repas',
+            'nom' => 'Santé',
+            'description' => 'Pharmacie, consultations et soins médicaux',
+        ]);
+
+        $logement = Categorie::create([
+            'user_id' => $user->id,
+            'nom' => 'Logement',
+            'description' => 'Loyer, factures d\'eau et d\'électricité',
+        ]);
+
+        $services = Categorie::create([
+            'user_id' => $user->id,
+            'nom' => 'Services',
+            'description' => 'Abonnements, internet, téléphone et services numériques',
         ]);
 
         $transport = Categorie::create([
             'user_id' => $user->id,
             'nom' => 'Transport',
-            'description' => 'Taxi, bus, carburant',
+            'description' => 'Taxi, bus, essence et déplacements',
         ]);
 
-        $loisirs = Categorie::create([
+        $alimentation = Categorie::create([
             'user_id' => $user->id,
-            'nom' => 'Loisirs',
-            'description' => 'Sorties et divertissement',
+            'nom' => 'Alimentation',
+            'description' => 'Repas, courses, restaurants et boissons',
         ]);
 
-        // 5. Portefeuilles
+        // 4. Portefeuilles (Espèce = créé automatiquement à l'inscription)
+        $espece = Portefeuille::create([
+            'user_id'   => $user->id,
+            'devise_id' => $xof->id,
+            'nom'       => 'Espèce',
+            'solde'     => 0,
+        ]);
+
         $comptePrincipal = Portefeuille::create([
             'user_id' => $user->id,
             'devise_id' => $xof->id,
@@ -68,7 +86,7 @@ class DemoSeeder extends Seeder
             'solde' => 0,
         ]);
 
-        // 6. Acteurs (contacts)
+        // 5. Acteurs (contacts)
         $employeur = Acteur::create([
             'user_id' => $user->id,
             'nom' => 'Mon Employeur',
@@ -82,7 +100,7 @@ class DemoSeeder extends Seeder
             'numero' => '771234567',
         ]);
 
-        // 7. Revenus (le solde est mis à jour manuellement ici)
+        // 6. Revenus (le solde est mis à jour manuellement ici)
         Revenu::create([
             'user_id' => $user->id,
             'portefeuille_id' => $comptePrincipal->id,
@@ -113,7 +131,7 @@ class DemoSeeder extends Seeder
         ]);
         $epargne->solde += 50000;
 
-        // 8. Dépenses
+        // 7. Dépenses
         $depenses = [
             [
                 'categorie_id' => $alimentation->id,
@@ -143,7 +161,7 @@ class DemoSeeder extends Seeder
                 'montant_total' => 12000,
             ],
             [
-                'categorie_id' => $loisirs->id,
+                'categorie_id' => $alimentation->id,
                 'portefeuille_id' => $comptePrincipal->id,
                 'date_operation' => '2026-03-20',
                 'designation' => 'Sortie restaurant',
@@ -171,7 +189,7 @@ class DemoSeeder extends Seeder
             }
         }
 
-        // 9. Sauvegarde les soldes finaux
+        // 8. Sauvegarde les soldes finaux
         $comptePrincipal->save();
         $epargne->save();
 
