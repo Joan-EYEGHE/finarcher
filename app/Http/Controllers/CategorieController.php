@@ -12,20 +12,24 @@ class CategorieController extends Controller
      * Liste des catégories du user connecté
      * Équivalent Java : GET /categories → findAllByUserId()
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Auth::id() = l'id du user connecté
-        // where() = la clause WHERE en SQL
-        // orderBy() = ORDER BY
-        // get() = exécute la requête et retourne une Collection (comme List<> en Java)
-        $categories = Categorie::where('user_id', Auth::id())
-            ->orderBy('nom')
-            ->get();
+        $query = Categorie::where('user_id', Auth::id())
+            ->withCount('depenses')
+            ->orderBy('nom');
 
-        // Passe la variable $categories à la vue
-        // compact('categories') crée ['categories' => $categories]
-        // Équivalent Java : model.addAttribute("categories", categories)
-        return view('categories.index', compact('categories'));
+        if ($search = $request->input('search')) {
+            $query->where('nom', 'like', '%' . $search . '%');
+        }
+
+        $categories = $query->paginate($request->integer('per_page', 12));
+        $categories->appends($request->except('page'));
+
+        $totalDepenses = \App\Models\Depense::whereHas('categorie', function ($q) {
+            $q->where('user_id', Auth::id());
+        })->count();
+
+        return view('categories.index', compact('categories', 'totalDepenses'));
     }
 
     /**
