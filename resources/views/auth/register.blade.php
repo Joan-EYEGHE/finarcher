@@ -1,78 +1,119 @@
-{{-- @extends = cette vue utilise le layout app.blade.php --}}
-@extends('layouts.app')
+@extends('layouts.auth')
 
-{{-- Remplit le @yield('title') du layout --}}
-@section('title', 'Inscription')
+@section('title', 'FinArcher — Créer un compte')
 
-{{-- Remplit le @yield('content') du layout --}}
 @section('content')
-<div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
-    <h2 class="text-2xl font-bold mb-6 text-center">Inscription</h2>
+<div x-data="{ tab: 'register' }">
 
-    <form method="POST" action="{{ route('register') }}">
-        {{-- Token CSRF obligatoire --}}
-        @csrf
+  {{-- Tabs --}}
+  <div class="auth-tabs">
+    <button type="button" class="auth-tab" :class="{ active: tab === 'login' }" @click="tab = 'login'">Connexion</button>
+    <button type="button" class="auth-tab" :class="{ active: tab === 'register' }" @click="tab = 'register'">Créer un compte</button>
+  </div>
 
-        {{-- Champ Nom --}}
-        <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
-                          @error('name') border-red-500 @enderror">
+  {{-- ══ FORMULAIRE LOGIN ══ --}}
+  <div x-show="tab === 'login'" x-cloak>
+    <h1 class="form-title">Bon retour !</h1>
+    <p class="form-subtitle">Connectez-vous pour accéder à votre espace.</p>
 
-            {{-- Affiche l'erreur de validation si elle existe --}}
-            @error('name')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+    <form method="POST" action="{{ route('login') }}">
+      @csrf
 
-        {{-- Champ Email --}}
-        <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
-                          @error('email') border-red-500 @enderror">
-            @error('email')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email"
+               class="form-input"
+               value="{{ old('email') }}"
+               placeholder="votre@email.com"
+               autocomplete="email">
+      </div>
 
-        {{-- Champ Numéro (optionnel) --}}
-        <div class="mb-4">
-            <label for="numero" class="block text-sm font-medium text-gray-700 mb-1">Numéro (optionnel)</label>
-            <input type="text" name="numero" id="numero" value="{{ old('numero') }}"
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" name="password"
+               class="form-input"
+               placeholder="••••••••"
+               autocomplete="current-password">
+      </div>
 
-        {{-- Champ Mot de passe --}}
-        <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-            <input type="password" name="password" id="password" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
-                          @error('password') border-red-500 @enderror">
-            @error('password')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- Confirmation mot de passe --}}
-        <div class="mb-6">
-            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
-            <input type="password" name="password_confirmation" id="password_confirmation" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        {{-- Bouton --}}
-        <button type="submit"
-                class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-            S'inscrire
-        </button>
+      <button type="submit" class="btn-primary">Se connecter</button>
     </form>
 
-    {{-- Lien vers connexion --}}
-    <p class="text-center mt-4 text-sm text-gray-600">
-        Déjà inscrit ?
-        <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Se connecter</a>
-    </p>
+    <div class="form-footer">
+      Pas encore de compte ? <a @click.prevent="tab = 'register'" href="#">Créer un compte</a>
+    </div>
+
+    <div class="form-footer" style="margin-top: 10px;">
+      <a href="#" class="form-link">Mot de passe oublié ?</a>
+    </div>
+  </div>
+
+  {{-- ══ FORMULAIRE REGISTER ══ --}}
+  <div x-show="tab === 'register'">
+    <h1 class="form-title">Créer un compte</h1>
+    <p class="form-subtitle">Rejoignez FinArcher pour gérer vos finances.</p>
+
+    <form method="POST" action="{{ route('register') }}">
+      @csrf
+
+      <div class="form-group">
+        <label class="form-label">Nom complet</label>
+        <input type="text" name="name"
+               class="form-input @error('name') error @enderror"
+               value="{{ old('name') }}"
+               placeholder="Joan Ndione"
+               autocomplete="name">
+        @error('name')
+          <p class="error-message">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email"
+               class="form-input @error('email') error @enderror"
+               value="{{ old('email') }}"
+               placeholder="votre@email.com"
+               autocomplete="email">
+        @error('email')
+          <p class="error-message">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Numéro de téléphone <span class="optional">(optionnel)</span></label>
+        <input type="tel" name="numero"
+               class="form-input"
+               value="{{ old('numero') }}"
+               placeholder="+221 77 000 00 00">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" name="password"
+               class="form-input @error('password') error @enderror"
+               placeholder="••••••••"
+               autocomplete="new-password">
+        @error('password')
+          <p class="error-message">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmer le mot de passe</label>
+        <input type="password" name="password_confirmation"
+               class="form-input"
+               placeholder="••••••••"
+               autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="btn-primary">Créer mon compte</button>
+    </form>
+
+    <div class="form-footer">
+      Déjà un compte ? <a @click.prevent="tab = 'login'" href="#">Se connecter</a>
+    </div>
+  </div>
+
 </div>
 @endsection

@@ -15,20 +15,17 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Afficher formulaire inscription
-// Route::get = @GetMapping en Spring
-// 'register' entre crochets = nom de la route (pour redirect()->route('register'))
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-
-// Traiter formulaire inscription
-// Route::post = @PostMapping en Spring
-Route::post('/register', [AuthController::class, 'register']);
-
-// Afficher formulaire connexion
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-
-// Traiter formulaire connexion
-Route::post('/login', [AuthController::class, 'login']);
+// Routes publiques réservées aux guests (redirige vers dashboard si déjà connecté)
+Route::middleware('guest')->group(function () {
+    // Afficher formulaire inscription
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    // Traiter formulaire inscription
+    Route::post('/register', [AuthController::class, 'register']);
+    // Afficher formulaire connexion
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    // Traiter formulaire connexion
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 /*
 |--------------------------------------------------------------------------

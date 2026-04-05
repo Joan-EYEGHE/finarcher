@@ -216,6 +216,20 @@
     }
     .form-footer a:hover { text-decoration: underline; }
 
+    /* Titres de formulaire */
+    .form-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .form-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
     /* Erreurs */
     .error-message {
       font-size: 11px;
