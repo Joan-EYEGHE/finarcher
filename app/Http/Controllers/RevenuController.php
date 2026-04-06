@@ -10,14 +10,38 @@ use Illuminate\Support\Facades\Auth;
 
 class RevenuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $revenus = Revenu::where('user_id', Auth::id())
-            ->with(['portefeuille.devise', 'acteur'])
-            ->orderByDesc('date_operation')
-            ->get();
+        $dateDebut = $request->get('date_debut', now()->startOfMonth()->format('Y-m-d'));
+        $dateFin   = $request->get('date_fin',   now()->format('Y-m-d'));
 
-        return view('revenus.index', compact('revenus'));
+        $query = Revenu::where('user_id', Auth::id())
+            ->with(['portefeuille.devise', 'acteur'])
+            ->whereBetween('date_operation', [$dateDebut, $dateFin])
+            ->orderByDesc('date_operation');
+
+        if ($request->filled('acteur_id')) {
+            $query->where('acteur_id', $request->acteur_id);
+        }
+        if ($request->filled('portefeuille_id')) {
+            $query->where('portefeuille_id', $request->portefeuille_id);
+        }
+
+        // KPIs (avant pagination)
+        $totalRevenus   = (clone $query)->sum('montant');
+        $countRevenus   = (clone $query)->count();
+        $moyenneRevenus = $countRevenus > 0 ? $totalRevenus / $countRevenus : 0;
+        $maxRevenuItem  = $countRevenus > 0 ? (clone $query)->orderByDesc('montant')->first() : null;
+
+        $revenus       = $query->paginate(15)->withQueryString();
+        $portefeuilles = Portefeuille::where('user_id', Auth::id())->orderBy('nom')->get();
+        $acteurs       = Acteur::where('user_id', Auth::id())->orderBy('nom')->get();
+
+        return view('revenus.index', compact(
+            'revenus', 'portefeuilles', 'acteurs',
+            'totalRevenus', 'countRevenus', 'moyenneRevenus', 'maxRevenuItem',
+            'dateDebut', 'dateFin'
+        ));
     }
 
     public function create()
