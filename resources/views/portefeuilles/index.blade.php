@@ -84,8 +84,65 @@ $defaultDeviseColor = ['bg' => '#F3F4F6', 'color' => '#6B7280'];
     @include('partials.search-bar', [
       'placeholder' => 'Rechercher un compte...',
       'xModel'      => 'searchTerm',
-      'withFilters' => false,
     ])
+  </div>
+
+  {{-- ══ Modale Filtres avancés ══ --}}
+  <div
+    x-show="showFilters"
+    x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-100"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background:rgba(0,0,0,0.40);"
+    @click="showFilters = false">
+    <div
+      @click.stop
+      x-transition:enter="transition ease-out duration-150"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-100"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      style="background:#fff; border-radius:12px; max-width:440px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.12);">
+      {{-- En-tête --}}
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:0.5px solid rgba(0,0,0,0.08);">
+        <h3 style="font-size:15px; font-weight:500; color:#171717;">Filtres avancés</h3>
+        <button type="button" @click="showFilters = false"
+          style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; border:none; background:none; cursor:pointer; border-radius:6px; color:#6B7280;"
+          onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='none'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      {{-- Formulaire --}}
+      <form method="GET" action="{{ route('portefeuilles.index') }}" style="padding:20px 24px; display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label style="font-size:12px; font-weight:500; color:#374151;">Date début</label>
+          <input type="date" name="date_debut" value="{{ request('date_debut') }}" class="form-input">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label style="font-size:12px; font-weight:500; color:#374151;">Date fin</label>
+          <input type="date" name="date_fin" value="{{ request('date_fin') }}" class="form-input">
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
+          <a href="{{ route('portefeuilles.index') }}"
+             style="font-size:13px; color:#6B7280; text-decoration:none;"
+             onmouseover="this.style.color='#171717'" onmouseout="this.style.color='#6B7280'">
+            Réinitialiser
+          </a>
+          <button type="submit"
+            style="padding:8px 18px; font-size:13px; font-weight:500; font-family:'Inter',sans-serif; border:none; border-radius:8px; background:#D97706; color:#fff; cursor:pointer;"
+            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+            Appliquer
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   {{-- ══ Grille des comptes ══ --}}
@@ -317,7 +374,7 @@ $defaultDeviseColor = ['bg' => '#F3F4F6', 'color' => '#6B7280'];
 <script>
 function comptesPage() {
   return {
-    searchTerm: '',
+    searchTerm: '{{ request('search', '') }}',
     showFilters: false,
     formOpen: false,
     formMode: 'create',

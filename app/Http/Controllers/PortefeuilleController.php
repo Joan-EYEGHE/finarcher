@@ -14,14 +14,26 @@ class PortefeuilleController extends Controller
      * with('devise') = charge la relation en même temps (évite le N+1)
      * Équivalent JPA : @EntityGraph ou JOIN FETCH
      */
-    public function index()
+    public function index(Request $request)
     {
-        $portefeuilles = Portefeuille::where('user_id', Auth::id())
+        $dateDebut = $request->input('date_debut');
+        $dateFin   = $request->input('date_fin');
+
+        $query = Portefeuille::where('user_id', Auth::id())
             ->with('devise')
-            ->withCount(['revenus', 'depenses'])
-            ->orderBy('nom')
-            ->paginate(12)
-            ->withQueryString();
+            ->withCount([
+                'revenus' => function ($q) use ($dateDebut, $dateFin) {
+                    if ($dateDebut) $q->where('date_operation', '>=', $dateDebut);
+                    if ($dateFin)   $q->where('date_operation', '<=', $dateFin);
+                },
+                'depenses' => function ($q) use ($dateDebut, $dateFin) {
+                    if ($dateDebut) $q->where('date_operation', '>=', $dateDebut);
+                    if ($dateFin)   $q->where('date_operation', '<=', $dateFin);
+                },
+            ])
+            ->orderBy('nom');
+
+        $portefeuilles = $query->paginate(12)->withQueryString();
 
         $devises = Devise::orderBy('nom')->get();
 
