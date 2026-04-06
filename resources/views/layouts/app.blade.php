@@ -185,11 +185,17 @@
     }
 
     /* ═══════════════════ MAIN CONTENT ═══════════════════ */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
     .main-content {
       margin-left: 210px;
       flex: 1;
       padding: 24px 28px;
       min-height: 100vh;
+      animation: fadeIn 0.25s ease-out;
     }
 
     /* ═══════════════════ CARDS ═══════════════════ */

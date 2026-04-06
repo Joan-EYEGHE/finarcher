@@ -19,8 +19,8 @@ class CategorieController extends Controller
 
         $query = Categorie::where('user_id', Auth::id())
             ->withCount(['depenses' => function ($q) use ($dateDebut, $dateFin) {
-                if ($dateDebut) $q->where('date', '>=', $dateDebut);
-                if ($dateFin)   $q->where('date', '<=', $dateFin);
+                if ($dateDebut) $q->where('date_operation', '>=', $dateDebut);
+                if ($dateFin)   $q->where('date_operation', '<=', $dateFin);
             }])
             ->orderBy('nom');
 
@@ -34,8 +34,8 @@ class CategorieController extends Controller
         $totalDepenses = \App\Models\Depense::whereHas('categorie', function ($q) {
             $q->where('user_id', Auth::id());
         })
-        ->when($dateDebut, fn($q) => $q->where('date', '>=', $dateDebut))
-        ->when($dateFin,   fn($q) => $q->where('date', '<=', $dateFin))
+        ->when($dateDebut, fn($q) => $q->where('date_operation', '>=', $dateDebut))
+        ->when($dateFin,   fn($q) => $q->where('date_operation', '<=', $dateFin))
         ->count();
 
         return view('categories.index', compact('categories', 'totalDepenses'));
