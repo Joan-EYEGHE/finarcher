@@ -14,20 +14,29 @@ class CategorieController extends Controller
      */
     public function index(Request $request)
     {
+        $dateDebut = $request->input('date_debut');
+        $dateFin   = $request->input('date_fin');
+
         $query = Categorie::where('user_id', Auth::id())
-            ->withCount('depenses')
+            ->withCount(['depenses' => function ($q) use ($dateDebut, $dateFin) {
+                if ($dateDebut) $q->where('date', '>=', $dateDebut);
+                if ($dateFin)   $q->where('date', '<=', $dateFin);
+            }])
             ->orderBy('nom');
 
         if ($search = $request->input('search')) {
             $query->where('nom', 'like', '%' . $search . '%');
         }
 
-        $categories = $query->paginate($request->integer('per_page', 12));
+        $categories = $query->paginate(12);
         $categories->appends($request->except('page'));
 
         $totalDepenses = \App\Models\Depense::whereHas('categorie', function ($q) {
             $q->where('user_id', Auth::id());
-        })->count();
+        })
+        ->when($dateDebut, fn($q) => $q->where('date', '>=', $dateDebut))
+        ->when($dateFin,   fn($q) => $q->where('date', '<=', $dateFin))
+        ->count();
 
         return view('categories.index', compact('categories', 'totalDepenses'));
     }

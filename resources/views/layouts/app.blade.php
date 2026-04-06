@@ -411,6 +411,40 @@
 
 @include('partials.sidebar')
 
+{{-- ══ Notifications flash (fixed top-right, auto-dismiss 4s) ══ --}}
+@if(session('success'))
+<div x-data="{ show: true }"
+     x-show="show"
+     x-init="setTimeout(() => { show = false }, 4000)"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 -translate-y-1"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-300"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     x-cloak
+     style="position:fixed; top:1rem; right:1rem; z-index:9999; max-width:360px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:#E1F5EE; border:0.5px solid #A7F3D0; border-radius:10px; padding:12px 16px; box-shadow:0 4px 16px rgba(0,0,0,0.08); font-size:13px; color:#085041; font-family:'Inter',sans-serif;">
+  <span>{{ session('success') }}</span>
+  <button @click="show = false" style="flex-shrink:0; background:none; border:none; cursor:pointer; color:#085041; opacity:0.6; padding:0; line-height:1;">&times;</button>
+</div>
+@endif
+@if(session('error'))
+<div x-data="{ show: true }"
+     x-show="show"
+     x-init="setTimeout(() => { show = false }, 4000)"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 -translate-y-1"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-300"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     x-cloak
+     style="position:fixed; top:1rem; right:1rem; z-index:9999; max-width:360px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:#FEE2E2; border:0.5px solid #FECACA; border-radius:10px; padding:12px 16px; box-shadow:0 4px 16px rgba(0,0,0,0.08); font-size:13px; color:#DC2626; font-family:'Inter',sans-serif;">
+  <span>{{ session('error') }}</span>
+  <button @click="show = false" style="flex-shrink:0; background:none; border:none; cursor:pointer; color:#DC2626; opacity:0.6; padding:0; line-height:1;">&times;</button>
+</div>
+@endif
+
 <main class="main-content">
   @yield('content')
 </main>
