@@ -8,6 +8,7 @@
 /x_utiles_ressources
 /x_claude
 CLAUDE.md
+.claude/
 .env
 .env.backup
 .env.production

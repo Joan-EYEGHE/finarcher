@@ -18,10 +18,14 @@ class PortefeuilleController extends Controller
     {
         $portefeuilles = Portefeuille::where('user_id', Auth::id())
             ->with('devise')
+            ->withCount(['revenus', 'depenses'])
             ->orderBy('nom')
-            ->get();
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('portefeuilles.index', compact('portefeuilles'));
+        $devises = Devise::orderBy('nom')->get();
+
+        return view('portefeuilles.index', compact('portefeuilles', 'devises'));
     }
 
     /**
