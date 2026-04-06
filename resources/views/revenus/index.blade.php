@@ -9,25 +9,25 @@
     border-collapse: collapse;
   }
   .revenus-table thead th {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: #6B7280;
     text-align: left;
-    padding: 0 16px 10px 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.08);
+    background: #FAFAF9;
   }
   .revenus-table thead th:last-child { text-align: right; }
   .revenus-table tbody tr { transition: background 0.1s; }
   .revenus-table tbody tr:hover { background: #FAFAF9; }
   .revenus-table tbody td {
     padding: 11px 16px;
-    border-top: 0.5px solid rgba(0,0,0,0.08);
+    border-bottom: 0.5px solid #f0f0f0;
     font-size: 13px;
     vertical-align: middle;
     color: #374151;
   }
-  .revenus-table tbody tr:first-child td { border-top: none; }
+  .revenus-table tbody tr:last-child td { border-bottom: none; }
   .revenus-table tbody td:last-child { text-align: right; }
 
   .td-date    { color: #6B7280; font-size: 12px; width: 100px; }
@@ -71,9 +71,7 @@
     border-radius: 12px;
     overflow: hidden;
     margin-top: 4px;
-    padding: 0 0 4px 0;
   }
-  .table-inner { padding: 18px 0 0 0; }
 
   .kpi-grid {
     display: grid;
@@ -157,6 +155,34 @@
     line-height: 1.5;
   }
   .btn-reset:hover { background: #f3f4f6; }
+
+  /* ── État de chargement ── */
+  .content-zone { position: relative; }
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(248,248,247,0.70);
+    backdrop-filter: blur(1px);
+    border-radius: 12px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 22px; height: 22px;
+    border: 2.5px solid rgba(5,150,105,0.2);
+    border-top-color: #059669;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .btn-applying {
+    opacity: 0.75;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 </style>
 @endsection
 
@@ -180,7 +206,8 @@
   x-cloak>
 
   {{-- ══ En-tête + filtre période ══ --}}
-  <form method="GET" action="{{ route('revenus.index') }}">
+  <form method="GET" action="{{ route('revenus.index') }}"
+        @submit.prevent="startLoading($event.target)">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px;">
       <h1 class="page-title">Revenus</h1>
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -196,7 +223,13 @@
           <input type="hidden" name="portefeuille_id" value="{{ request('portefeuille_id') }}">
         @endif
 
-        <button type="submit" class="btn-apply">Appliquer</button>
+        <button type="submit" class="btn-apply" :class="{ 'btn-applying': loading }">
+          <span x-show="!loading">Appliquer</span>
+          <span x-show="loading" style="display:inline-flex; align-items:center; gap:5px;">
+            <span style="width:12px; height:12px; border:1.5px solid rgba(55,65,81,0.3); border-top-color:#374151; border-radius:50%; display:inline-block; animation:spin 0.7s linear infinite;"></span>
+            Chargement…
+          </span>
+        </button>
 
         <button
           type="button"
@@ -247,17 +280,30 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:8px; margin-top:auto;">
-        <button type="submit" class="btn-apply" style="background:#D97706; color:#fff; border-color:#D97706;"
-          onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#D97706'">
-          Appliquer les filtres
+        <button type="submit" class="btn-apply" :class="{ 'btn-applying': loading }"
+          style="background:#D97706; color:#fff; border-color:#D97706;"
+          onmouseover="if(!loading) this.style.background='#b45309'" onmouseout="this.style.background='#D97706'">
+          <span x-show="!loading">Appliquer les filtres</span>
+          <span x-show="loading" style="display:inline-flex; align-items:center; gap:5px;">
+            <span style="width:12px; height:12px; border:1.5px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; display:inline-block; animation:spin 0.7s linear infinite;"></span>
+            Chargement…
+          </span>
         </button>
         <a href="{{ route('revenus.index') }}" class="btn-reset">Réinitialiser</a>
       </div>
     </div>
   </form>
 
+  {{-- ══ Zone de contenu avec overlay de chargement ══ --}}
+  <div class="content-zone" style="margin-top:20px;">
+
+    {{-- Overlay chargement --}}
+    <div x-show="loading" class="loading-overlay" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+      <div class="spinner"></div>
+    </div>
+
   {{-- ══ KPIs ══ --}}
-  <div class="kpi-grid" style="margin-top:20px;">
+  <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-label">Total revenus</div>
       <div class="kpi-value">{{ number_format($totalRevenus, 0, ',', ' ') }} FCFA</div>
@@ -294,11 +340,10 @@
     </div>
   @else
     <div class="table-wrapper">
-      <div class="table-inner">
         <table class="revenus-table">
           <thead>
             <tr>
-              <th style="padding-left:16px;">Date</th>
+              <th>Date</th>
               <th>Motif</th>
               <th>Contact</th>
               <th>Compte</th>
@@ -373,7 +418,6 @@
             @endforelse
           </tbody>
         </table>
-      </div>
     </div>
 
     {{-- ══ Pagination ══ --}}
@@ -382,6 +426,8 @@
       'entityLabel' => 'revenus',
     ])
   @endif
+
+  </div>{{-- /content-zone --}}
 
   {{-- ══════════════════════════════════════════
        MODALE FORMULAIRE (création / édition)
@@ -535,6 +581,7 @@ function revenusPage() {
   return {
     searchTerm: '',
     showFilters: {{ request()->hasAny(['acteur_id', 'portefeuille_id']) ? 'true' : 'false' }},
+    loading: false,
     formOpen: false,
     formMode: 'create',
     formAction: '',
@@ -544,6 +591,12 @@ function revenusPage() {
     formMontant: '',
     formPortefeuilleId: '',
     formActeurId: '',
+
+    startLoading(form) {
+      this.loading = true;
+      // Délai court pour laisser l'overlay s'afficher avant le rechargement
+      setTimeout(() => form.submit(), 200);
+    },
 
     openCreate() {
       this.formMode = 'create';
