@@ -12,7 +12,8 @@ class ActeurController extends Controller
     {
         $acteurs = Acteur::where('user_id', Auth::id())
             ->orderBy('nom')
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         return view('acteurs.index', compact('acteurs'));
     }
