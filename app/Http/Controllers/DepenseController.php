@@ -10,14 +10,38 @@ use Illuminate\Support\Facades\Auth;
 
 class DepenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $depenses = Depense::where('user_id', Auth::id())
-            ->with(['categorie', 'portefeuille.devise'])
-            ->orderByDesc('date_operation')
-            ->get();
+        $dateDebut = $request->input('date_debut', now()->startOfMonth()->format('Y-m-d'));
+        $dateFin   = $request->input('date_fin',   now()->format('Y-m-d'));
 
-        return view('depenses.index', compact('depenses'));
+        $query = Depense::where('user_id', Auth::id())
+            ->with(['categorie', 'portefeuille'])
+            ->whereBetween('date_operation', [$dateDebut, $dateFin])
+            ->orderByDesc('date_operation');
+
+        if ($request->filled('categorie_id')) {
+            $query->where('categorie_id', $request->categorie_id);
+        }
+        if ($request->filled('portefeuille_id')) {
+            $query->where('portefeuille_id', $request->portefeuille_id);
+        }
+
+        $allFiltered     = (clone $query)->get();
+        $totalDepenses   = $allFiltered->sum('montant_total');
+        $countDepenses   = $allFiltered->count();
+        $moyenneDepenses = $countDepenses > 0 ? $totalDepenses / $countDepenses : 0;
+        $maxDepenseItem  = $allFiltered->sortByDesc('montant_total')->first();
+
+        $depenses      = $query->paginate(15)->withQueryString();
+        $categories    = Categorie::where('user_id', Auth::id())->orderBy('nom')->get();
+        $portefeuilles = Portefeuille::where('user_id', Auth::id())->orderBy('nom')->get();
+
+        return view('depenses.index', compact(
+            'depenses', 'categories', 'portefeuilles',
+            'dateDebut', 'dateFin',
+            'totalDepenses', 'countDepenses', 'moyenneDepenses', 'maxDepenseItem'
+        ));
     }
 
     public function create()
