@@ -33,6 +33,20 @@ class PortefeuilleController extends Controller
             ])
             ->orderBy('nom');
 
+        // Filtre par période : ne retourner que les comptes ayant eu au moins
+        // une opération (revenu OU dépense) dans la période sélectionnée
+        if ($dateDebut || $dateFin) {
+            $query->where(function ($q) use ($dateDebut, $dateFin) {
+                $q->whereHas('revenus', function ($r) use ($dateDebut, $dateFin) {
+                    if ($dateDebut) $r->where('date_operation', '>=', $dateDebut);
+                    if ($dateFin)   $r->where('date_operation', '<=', $dateFin);
+                })->orWhereHas('depenses', function ($d) use ($dateDebut, $dateFin) {
+                    if ($dateDebut) $d->where('date_operation', '>=', $dateDebut);
+                    if ($dateFin)   $d->where('date_operation', '<=', $dateFin);
+                });
+            });
+        }
+
         $portefeuilles = $query->paginate(12)->withQueryString();
 
         $devises = Devise::orderBy('nom')->get();
