@@ -25,7 +25,7 @@
 
 <!-- TODO: ajouter screenshot du dashboard ici -->
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Dashboard FinArcher" width="800"/>
+  <img src="https://res.cloudinary.com/di3dithde/image/upload/v1775837925/dashboard-temp_l1ms59.png" alt="Dashboard FinArcher" width="800"/>
 </p>
 
 ---
